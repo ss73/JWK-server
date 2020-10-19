@@ -22,7 +22,10 @@ The following pre-requisites are required or recommended:
   
 Running the server:
 
-``node index.js``
+```
+npm install
+node index.js
+```
 
 ## Running the application
 

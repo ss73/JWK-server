@@ -1,0 +1,16 @@
+{
+  "name": "jwk",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Stellan Söderström",
+  "license": "SEE LICENSE IN LICENSE",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "jose": "^2.0.2"
+  }
+}

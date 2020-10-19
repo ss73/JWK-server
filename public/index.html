@@ -1,0 +1,154 @@
+<html>
+
+<head>
+    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet'>
+
+    <style>
+        body {
+            font-family: 'Roboto';
+            font-size: 10pt;
+            background-color: #303030;
+            color: white;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .subframe {
+            border: 0px outset gray;
+            border-radius: 8px;
+            background-color: lightgray;
+            text-align: center;
+        }
+
+        .messagebox {
+            padding: 8px;
+            width: 416px;
+            border-radius: 4px;
+            border-color: #505050;
+            border-width: 1px;
+            border-style: outset;
+            background-color: #202020;
+        }
+
+        #left {
+            float: left;
+            width: calc(50% - 2px);
+            height: 70%;
+            overflow: hidden;
+        }
+
+        #right {
+            float: right;
+            width: calc(50% - 2px);
+            height: 70%;
+            overflow: hidden;
+        }
+
+        iframe {
+            height: 220px;
+            width: 540px;
+            resize: both;
+            overflow: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='left'>
+        <h1>Containing application</h1>
+    This is the top level application. External content is embedded as Iframes. This works analogous with the
+    <code>&lt;Webview&gt;</code> component in React Native.
+    <br />
+    <br />
+        <table>
+            <tr>
+                <td>User ID:</td>
+                <td colspan=2><input type='text' id='uuid' size=60 /></td>
+            </tr>
+            <tr>
+                <td>Token:</td>
+                <td colspan=2><input type='text' id='token' size=60 /></td>
+            </tr>
+            <tr>
+                <td>Decoded token:</td>
+                <td colspan=2>
+                    <div id='decoded_token' class='messagebox'></div>
+                </td>
+            </tr>
+            <tr>
+                <td>Actions:</td>
+                <td>
+                    <button id='b_tok' type="button" onclick="buttonGetToken()">Get sign-on token</button>
+                    <button id='b_decode' type="button" onclick="buttonDecode()">Decode token</button>
+                    <button id='b_open' type="button" onclick="buttonOpen()">Open embedded content</button>
+                </td>
+                <td>
+                    &nbsp;
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        function buttonGetToken() {
+            let uuid = document.getElementById('uuid').value
+            if (!uuid) {
+                uuid = ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
+                document.getElementById('uuid').value = uuid;
+            }
+            let request = new Request('/token/' + uuid, { method: 'GET' });
+            fetch(request)
+                .then(response => {
+                    if (response.status === 200) {
+                        return response.text();
+                    } else {
+                        throw new Error('Something went wrong on api server!');
+                    }
+                })
+                .then(response => {
+                    console.log(response);
+                    document.getElementById('token').value = response;
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        }
+    </script>
+
+    <script>
+        function buttonDecode() {
+            let token = document.getElementById('token').value
+            let request = new Request('/token/decode/' + token, { method: 'GET' });
+            fetch(request)
+                .then(response => {
+                    if (response.status === 200) {
+                        return response.text();
+                    } else {
+                        throw new Error('Something went wrong on api server!');
+                    }
+                })
+                .then(response => {
+                    console.log(response);
+                    document.getElementById('decoded_token').innerHTML = "<pre>" + JSON.stringify(JSON.parse(response), null, 4) + "</pre>";
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        }
+
+        function buttonOpen() {
+            document.getElementById('embedded').src = "/embedded_app/" + document.getElementById('token').value;
+        }
+    </script>
+    <br />
+    <br />
+    <div id="right" class="subframe">
+        <iframe id='embedded' src="embedded.html" scrolling="no" frameborder="0"
+            style="position: relative; height: 100%; width: 100%;"></iframe>
+    </div>
+</body>
+
+</html>
